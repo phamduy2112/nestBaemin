@@ -1,0 +1,69 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model category {
+  category_id    Int      @id @default(autoincrement())
+  category_name  String   @db.VarChar(255)
+  category_image String?  @db.VarChar(255)
+  is_remove      Boolean? @default(false)
+}
+
+model order {
+  order_id     Int        @id @default(autoincrement())
+  user_id      Int?
+  list_sanpham Json
+  ngay_dathang DateTime?  @default(now()) @db.Timestamp(6)
+  shipping     shipping[]
+}
+
+model shipping {
+  ship_id      Int       @id @default(autoincrement())
+  order_id     Int?
+  full_name    String    @db.VarChar(255)
+  email        String?   @db.VarChar(255)
+  phone        String?   @db.VarChar(20)
+  address      String    @db.VarChar(255)
+  ngay_dathang DateTime? @default(now()) @db.Timestamp(6)
+  order        order?    @relation(fields: [order_id], references: [order_id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model user {
+  user_id   Int     @id @default(autoincrement())
+  tendn     String  @db.VarChar(255)
+  firstname String  @db.VarChar(255)
+  lastname  String  @db.VarChar(255)
+  phone     String? @db.VarChar(20)
+  email     String? @db.VarChar(255)
+  password  String  @db.VarChar(255)
+}
+
+model products {
+  id          Int     @id @default(autoincrement())
+  store_id    Int?
+  name        String  @db.VarChar(255)
+  description String?
+  price       Decimal @db.Decimal(10, 2)
+  inventory   Int     @default(100)
+  image_url   String? @db.VarChar(255)
+  category    String? @db.VarChar(255)
+  stores      stores? @relation(fields: [store_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model stores {
+  id            Int        @id @default(autoincrement())
+  name          String     @db.VarChar(255)
+  address       String     @db.VarChar(255)
+  opening_hours String?    @db.VarChar(255)
+  rating        Float?
+  review_count  Int?       @default(0)
+  status        String?    @default("Mở cửa") @db.VarChar(50)
+  service_fee   Decimal?   @default(0.0) @db.Decimal(5, 2)
+  products      products[]
+}
